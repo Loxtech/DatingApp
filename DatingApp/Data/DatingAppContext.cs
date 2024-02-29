@@ -19,9 +19,51 @@ namespace DatingApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>(Entity => Entity.HasIndex(e => e.Login).IsUnique()) ;
-            modelBuilder.Entity<City>(Entity => Entity.HasIndex(e => e.CityName).IsUnique());
+            modelBuilder.Entity<User>()
+                .HasIndex(e => e.Login)
+                .IsUnique();
 
+            modelBuilder.Entity<User>()
+                .Property(e => e.CreateDate)
+                .HasDefaultValueSql("GETDATE()");
+
+            modelBuilder.Entity<Like>()
+               .Property(e => e.Status)
+               .HasDefaultValueSql("0");
+
+            modelBuilder.Entity<City>()
+               .HasIndex(b => b.CityName)
+               .IsUnique()
+               .HasFilter(null);
+
+            // Configure the many-to-many relationship between UserProfile and Like
+            modelBuilder.Entity<Like>()
+                .HasKey(l => l.Id);
+
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.Liker)
+                .WithMany(u => u.LikedUsers)
+                .HasForeignKey(l => l.LikerId)
+                .OnDelete(DeleteBehavior.Restrict); // Set the appropriate delete behavior
+
+            modelBuilder.Entity<Like>()
+                .HasOne(l => l.Likee)
+                .WithMany(u => u.LikedByUsers)
+                .HasForeignKey(l => l.LikeeId)
+                .OnDelete(DeleteBehavior.Restrict); // Set the appropriate delete behavior
+
+            // Additional configurations for UserProfile entity if needed
+            modelBuilder.Entity<UserProfile>()
+                .HasMany(u => u.LikedUsers)
+                .WithOne(l => l.Liker)
+                .HasForeignKey(l => l.LikerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserProfile>()
+                .HasMany(u => u.LikedByUsers)
+                .WithOne(l => l.Likee)
+                .HasForeignKey(l => l.LikeeId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

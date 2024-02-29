@@ -29,7 +29,6 @@ namespace DatingApp.Models
         [Required(ErrorMessage = "Please provide a password2")]
         [StringLength(100)]
         public string Password2 { get; set; } = string.Empty;
-
         public DateTime CreateDate { get; set; }
         public DateTime? DeleteDate { get; set; }
 

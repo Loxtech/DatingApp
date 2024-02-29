@@ -26,5 +26,7 @@ namespace DatingApp.Models
 
         [Required(ErrorMessage = "Please provvide a valid user Id")]
         public int UserId { get; set; }
+        public virtual ICollection<Like> LikedByUsers { get; set; } = new List<Like>();
+        public virtual ICollection<Like> LikedUsers { get; set; } = new List<Like>();
     }
 }

@@ -5,9 +5,16 @@ namespace DatingApp.Models
 {
     public class City
     {
-        [Required]
+        public City()
+        {
+            UserProfile = new List<UserProfile>();
+        }
         public int Id { get; set; }
-        [Required]
-        public string CityName { get; set; }
+
+        [Required(ErrorMessage = "Please provide a City Name")]
+        [StringLength(10)]
+        public string CityName { get; set; } = null!;
+
+        public List<UserProfile> UserProfile { get; set; }
     }
 }

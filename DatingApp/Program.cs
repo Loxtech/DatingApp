@@ -1,10 +1,14 @@
 using DatingApp.Components;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddDbContext<DatingApp.Data.DatingAppContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ConString") ?? throw new InvalidOperationException("Connection string not found.")));
+
+builder.Services.AddQuickGridEntityFrameworkAdapter();
 
 var app = builder.Build();
 

@@ -36,34 +36,73 @@ namespace DatingApp.Data
                .IsUnique()
                .HasFilter(null);
 
+            modelBuilder.Entity<Gender>()
+               .HasIndex(g => g.GenderName)
+               .IsUnique()
+               .HasFilter(null);
+
+            #region Like Many to Many
+
             // Configure the many-to-many relationship between UserProfile and Like
             modelBuilder.Entity<Like>()
                 .HasKey(l => l.Id);
 
             modelBuilder.Entity<Like>()
-                .HasOne(l => l.Liker)
+                .HasOne(l => l.Sender)
                 .WithMany(u => u.LikedUsers)
-                .HasForeignKey(l => l.LikerId)
+                .HasForeignKey(l => l.SenderId)
                 .OnDelete(DeleteBehavior.Restrict); // Set the appropriate delete behavior
 
             modelBuilder.Entity<Like>()
-                .HasOne(l => l.Likee)
+                .HasOne(l => l.Receiver)
                 .WithMany(u => u.LikedByUsers)
-                .HasForeignKey(l => l.LikeeId)
+                .HasForeignKey(l => l.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict); // Set the appropriate delete behavior
 
             // Additional configurations for UserProfile entity if needed
             modelBuilder.Entity<UserProfile>()
                 .HasMany(u => u.LikedUsers)
-                .WithOne(l => l.Liker)
-                .HasForeignKey(l => l.LikerId)
+                .WithOne(l => l.Sender)
+                .HasForeignKey(l => l.SenderId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<UserProfile>()
                 .HasMany(u => u.LikedByUsers)
-                .WithOne(l => l.Likee)
-                .HasForeignKey(l => l.LikeeId)
+                .WithOne(l => l.Receiver)
+                .HasForeignKey(l => l.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
+            #endregion
+
+            #region Message Many to Many
+            // Configure the many-to-many relationship between UserProfile and Like
+            modelBuilder.Entity<Message>()
+                .HasKey(l => l.Id);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(l => l.Sender)
+                .WithMany(u => u.MessagedUsers)
+                .HasForeignKey(l => l.SenderId)
+                .OnDelete(DeleteBehavior.Restrict); // Set the appropriate delete behavior
+
+            modelBuilder.Entity<Message>()
+                .HasOne(l => l.Receiver)
+                .WithMany(u => u.MessagedByUsers)
+                .HasForeignKey(l => l.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict); // Set the appropriate delete behavior
+
+            // Additional configurations for UserProfile entity if needed
+            modelBuilder.Entity<UserProfile>()
+                .HasMany(u => u.MessagedUsers)
+                .WithOne(l => l.Sender)
+                .HasForeignKey(l => l.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserProfile>()
+                .HasMany(u => u.MessagedByUsers)
+                .WithOne(l => l.Receiver)
+                .HasForeignKey(l => l.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+            #endregion
         }
     }
 }

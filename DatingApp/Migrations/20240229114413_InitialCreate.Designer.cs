@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DatingApp.Migrations
 {
     [DbContext(typeof(DatingAppContext))]
-    [Migration("20240229093245_InitialCreate")]
+    [Migration("20240229114413_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -35,7 +35,8 @@ namespace DatingApp.Migrations
 
                     b.Property<string>("CityName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
@@ -47,10 +48,21 @@ namespace DatingApp.Migrations
 
             modelBuilder.Entity("DatingApp.Models.Gender", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("GenderName")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GenderName")
+                        .IsUnique();
 
                     b.ToTable("Genders");
                 });
@@ -63,10 +75,22 @@ namespace DatingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Status")
+                    b.Property<int>("ReceiverId")
                         .HasColumnType("int");
 
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("0");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
 
                     b.ToTable("Likes");
                 });
@@ -79,7 +103,20 @@ namespace DatingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
                 });
@@ -93,7 +130,9 @@ namespace DatingApp.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<DateTime?>("DeleteDate")
                         .HasColumnType("datetime2");
@@ -172,14 +211,68 @@ namespace DatingApp.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CityId");
+
+                    b.HasIndex("GenderId");
+
                     b.HasIndex("UserId")
                         .IsUnique();
 
                     b.ToTable("UserProfiles");
                 });
 
+            modelBuilder.Entity("DatingApp.Models.Like", b =>
+                {
+                    b.HasOne("DatingApp.Models.UserProfile", "Receiver")
+                        .WithMany("LikedByUsers")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DatingApp.Models.UserProfile", "Sender")
+                        .WithMany("LikedUsers")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("DatingApp.Models.Message", b =>
+                {
+                    b.HasOne("DatingApp.Models.UserProfile", "Receiver")
+                        .WithMany("MessagedByUsers")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DatingApp.Models.UserProfile", "Sender")
+                        .WithMany("MessagedUsers")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("DatingApp.Models.UserProfile", b =>
                 {
+                    b.HasOne("DatingApp.Models.City", null)
+                        .WithMany("UserProfile")
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DatingApp.Models.Gender", null)
+                        .WithMany("UserProfile")
+                        .HasForeignKey("GenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DatingApp.Models.User", null)
                         .WithOne("userProfile")
                         .HasForeignKey("DatingApp.Models.UserProfile", "UserId")
@@ -187,10 +280,31 @@ namespace DatingApp.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DatingApp.Models.City", b =>
+                {
+                    b.Navigation("UserProfile");
+                });
+
+            modelBuilder.Entity("DatingApp.Models.Gender", b =>
+                {
+                    b.Navigation("UserProfile");
+                });
+
             modelBuilder.Entity("DatingApp.Models.User", b =>
                 {
                     b.Navigation("userProfile")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DatingApp.Models.UserProfile", b =>
+                {
+                    b.Navigation("LikedByUsers");
+
+                    b.Navigation("LikedUsers");
+
+                    b.Navigation("MessagedByUsers");
+
+                    b.Navigation("MessagedUsers");
                 });
 #pragma warning restore 612, 618
         }

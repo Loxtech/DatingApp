@@ -20,13 +20,16 @@ namespace DatingApp.Models
         public int WeightKG { get; set; }
         public string? AboutMe { get; set; }
 
-        [Required(ErrorMessage = "Please provvide a valid city code")]
+        [Required(ErrorMessage = "Please provide a valid city code")]
         public int CityId { get; set; }
+        [Required(ErrorMessage = "Please provide a valid Gender")]
         public int GenderId { get; set; }
 
-        [Required(ErrorMessage = "Please provvide a valid user Id")]
+        [Required(ErrorMessage = "Please provide a valid user Id")]
         public int UserId { get; set; }
         public virtual ICollection<Like> LikedByUsers { get; set; } = new List<Like>();
         public virtual ICollection<Like> LikedUsers { get; set; } = new List<Like>();
+        public virtual ICollection<Message> MessagedByUsers { get; set; } = new List<Message>();
+        public virtual ICollection<Message> MessagedUsers { get; set; } = new List<Message>();
     }
 }
